@@ -1,40 +1,7 @@
 var http = require('http');
+var Model = require('./model');
 
-
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/pos-unoesc');
-
-var db = mongoose.connection;
-
-db.on('error', function(err){
-    console.log('Erro de conexao', err);
-});
-
-db.on('open', function(){
-    console.log('Conexão aberta');
-});
-
-db.on('connected', function(err){
-    console.log('Conectado');
-});
-
-db.on('disconnected', function(err){
-    console.log('Desconectado');
-});
-
-var Schema = mongoose.Schema;
-
-var json_schema = {
-    name: {type: String, default: ''},
-    description: {type: String, default: ''},
-    alcohol: {type: Number, min: 0},
-    category: {type: String, default: ''},
-    created_at: {type: Date, default: Date.now}
-}
-
-var BeerSchema = new Schema(json_schema);
-
-var Beer = mongoose.model('Beer', BeerSchema);
+var msg = '';
 
 var Controller = {
     create: function(req, res) {
@@ -48,9 +15,8 @@ var Controller = {
             category: 'pilsen'
         }
 
-        var model = new Beer(dados);
-        
-        var msg = '';
+        var model = new Model(dados);
+
 
         model.save(function(err, data){
             if(err){
@@ -65,10 +31,10 @@ var Controller = {
         });
     },
     retrieve: function(req, res) {
-        var query = {}, msg = '';
+        var query = {};
         res.writeHead(200, {'Content-Type': 'application/json'});
         
-        Beer.find(query, function(err, data){
+        Model.find(query, function(err, data){
             if(err){
                 console.log('Erro: ', err);
                 msg = 'Erro: ' + err;
@@ -86,7 +52,7 @@ var Controller = {
 
         res.writeHead(200, {'Content-Type': 'application/json'});
         
-        var Beer = mongoose.model('Beer', BeerSchema), query = {name: /skol/i};
+        var query = {name: /skol/i};
 
 
         var mod = {
@@ -98,9 +64,9 @@ var Controller = {
         var optional = {
             upsert: false,
             multi: false
-        }, msg = '';
+        };
 
-        Beer.update(query, mod, function(err, data) {
+        Model.update(query, mod, function(err, data) {
             if(err) {
                 console.log('Erro: ', err);
                 msg = 'Erro: ' + err;
@@ -119,9 +85,9 @@ var Controller = {
     
     delete: function(req, res) {
         res.writeHead(200, {'Content-Type': 'application/json'});
-        var Beer = mongoose.model('Beer', BeerSchema), query = {name: /skol/i}, msg = '';
+        var query = {name: /skol/i};
 
-        Beer.remove(query, function(err, data) {
+        Model.remove(query, function(err, data) {
             if(err){
                 console.log('Erro: ', erro);
                 msg = 'Erro: ' + erro;
